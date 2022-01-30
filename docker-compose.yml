@@ -14,6 +14,8 @@ services:
       tail -f /dev/null
     ports:
       - "8080:8080"
+    env_file:
+      - .env
     depends_on:
       - db
   db:
