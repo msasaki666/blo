@@ -42,6 +42,16 @@ func main() {
 		})
 	})
 
+	// お試しよう
+	ag := r.Group("/auth")
+	// ログイン状態の検証
+	ag.Use(authMiddleware.MiddlewareFunc())
+	ag.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status": "ok",
+		})
+	})
+
 	ug := r.Group("/users")
 	ug.POST("/login", authMiddleware.LoginHandler)
 
@@ -113,7 +123,8 @@ func createJwtMiddleware(secretKey, identityKey string, db *gorm.DB) (*jwt.GinJW
 			}
 			return jwt.MapClaims{}
 		},
-		// 未編集
+		// MiddlewareFuncで呼ばれる
+		// クレームからログインIDを取得する
 		IdentityHandler: func(c *gin.Context) interface{} {
 			claims := jwt.ExtractClaims(c)
 			return &models.User{
@@ -143,13 +154,19 @@ func createJwtMiddleware(secretKey, identityKey string, db *gorm.DB) (*jwt.GinJW
 
 			return &u, nil
 		},
-		// 未編集
+		// MiddlewareFuncで呼ばれる
+		// トークンのユーザ情報からの認証
+		// dataはIdentityHandlerの戻り値
 		Authorizator: func(data interface{}, c *gin.Context) bool {
-			if v, ok := data.(*models.User); ok && v.Email == "admin" {
-				return true
+			v, ok := data.(*models.User)
+			if !ok {
+				return false
 			}
 
-			return false
+			var u models.User
+			// identityKeyで探して、見つかればok
+			tx := db.First(&u, v)
+			return !errors.Is(tx.Error, gorm.ErrRecordNotFound)
 		},
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code, gin.H{
@@ -165,7 +182,7 @@ func createJwtMiddleware(secretKey, identityKey string, db *gorm.DB) (*jwt.GinJW
 		// - "query:<name>"
 		// - "cookie:<name>"
 		// - "param:<name>"
-		TokenLookup: "header: Authorization, query: token, cookie: jwt",
+		// TokenLookup: "header: Authorization, query: token, cookie: jwt",
 		// TokenLookup: "query:token",
 		// TokenLookup: "cookie:token",
 
