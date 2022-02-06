@@ -1,1 +1,3 @@
 DB_DSN=postgres://app:password@db:5432/app
+SECRET_KEY=
+TOKEN_TIMEOUT=24h

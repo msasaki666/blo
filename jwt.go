@@ -1,7 +1,7 @@
 package main
 
 import (
-	"app/app/models"
+	"app/models"
 	"errors"
 	"time"
 
@@ -13,12 +13,14 @@ import (
 
 // 参考
 // https://taisablog.com/archives/go-jwt
-func createJwtMiddleware(secretKey, identityKey string, db *gorm.DB) (*jwt.GinJWTMiddleware, error) {
+func createJwtMiddleware(secretKey, identityKey string, db *gorm.DB, tokenTimeout time.Duration) (*jwt.GinJWTMiddleware, error) {
 	return jwt.New(&jwt.GinJWTMiddleware{
 		// Realm:       "test zone",
-		Key:         []byte(secretKey),
-		Timeout:     time.Hour,
-		MaxRefresh:  time.Hour,
+		Key:     []byte(secretKey),
+		Timeout: tokenTimeout,
+		// 期限が切れてから自動でリフレッシュできる期間。実質のトークンの期限はTimeout + MaxRefresh
+		// デフォルト0
+		// MaxRefresh:  time.Hour,
 		IdentityKey: identityKey,
 		// ログイン時にTokenを発行するLoginHandlerではAuthenticatorとPayloadFuncが呼ばれる
 		// PayloadFuncはペイロードに含めるクレームを設定

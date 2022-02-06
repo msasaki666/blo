@@ -1,4 +1,5 @@
 FROM golang:1.17
+ENV TZ Asia/Tokyo
 ENV GOBIN=/go/bin
 WORKDIR /go/src/app
 RUN go install github.com/x-motemen/gore/cmd/gore@latest && \
