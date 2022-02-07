@@ -13,6 +13,11 @@ import (
 )
 
 func main() {
+	r := setupRouter()
+	r.Run()
+}
+
+func setupRouter() *gin.Engine {
 	db := setupDb(models.MigrationTargets()...)
 	// セキュアなトークンの生成方法
 	// https://qiita.com/catatsuy/items/e21a889d52041e432d87
@@ -87,6 +92,5 @@ func main() {
 		db,
 		authMiddleware,
 	)
-
-	r.Run()
+	return r
 }

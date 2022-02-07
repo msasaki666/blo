@@ -11,7 +11,11 @@ RUN go install github.com/x-motemen/gore/cmd/gore@latest && \
     go install github.com/stamblerre/gocode@latest && \
     go install github.com/uudashr/gopkgs/v2/cmd/gopkgs@latest && \
     go install github.com/rogpeppe/godef@latest && \
-    go install honnef.co/go/tools/cmd/staticcheck@latest
+    go install honnef.co/go/tools/cmd/staticcheck@latest && \
+    # モックの定義を自動生成する
+    go install github.com/vektra/mockery/v2@latest && \
+    # 単体テストをいい感じに生成してくれるツール
+    go install github.com/cweill/gotests/gotests@latest
 COPY go.mod go.sum ./
 RUN go mod download
 EXPOSE 8080
