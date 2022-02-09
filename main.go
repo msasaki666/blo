@@ -10,15 +10,22 @@ import (
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
-	r := setupRouter()
+	dsn, ok := os.LookupEnv("DB_DSN")
+	if !ok {
+		panic("Set DB_DSN environment variable")
+	}
+
+	db := setupDb(postgres.Open(dsn), models.MigrationTargets()...)
+	r := setupRouter(db)
 	r.Run()
 }
 
-func setupRouter() *gin.Engine {
-	db := setupDb(models.MigrationTargets()...)
+func setupRouter(db *gorm.DB) *gin.Engine {
 	// セキュアなトークンの生成方法
 	// https://qiita.com/catatsuy/items/e21a889d52041e432d87
 	secretKey, ok := os.LookupEnv("SECRET_KEY")

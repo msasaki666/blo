@@ -1,25 +1,17 @@
 package main
 
 import (
-	"os"
-
 	"go.uber.org/zap"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"moul.io/zapgorm2"
 )
 
-func setupDb(models ...interface{}) *gorm.DB {
-	dsn, ok := os.LookupEnv("DB_DSN")
-	if !ok {
-		panic("Set DB_DSN environment variable")
-	}
-
+func setupDb(dial gorm.Dialector, models ...interface{}) *gorm.DB {
 	logger := zapgorm2.New(zap.L())
 	logger.SetAsDefault() // optional: configure gorm to use this zapgorm.Logger for callbacks
 	db, err := gorm.Open(
 		// このDSNはURL指定してもいい
-		postgres.Open(dsn),
+		dial,
 		&gorm.Config{Logger: logger},
 	)
 	if err != nil {
